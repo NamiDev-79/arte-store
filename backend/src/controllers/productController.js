@@ -1,40 +1,32 @@
 const fetch = require('node-fetch');
 const { pool } = require('../config/database');
 
-/* ── Helper: fetch image URL from Lorem Picsum ── */
+/* -- Helper: fetch image URL from Lorem Picsum -- */
 const fetchArtImageUrl = async (productName) => {
   try {
-    // Use a deterministic seed based on the product name for consistent images
     const seed = encodeURIComponent(productName.replace(/\s+/g, '-').toLowerCase());
-    const width = 600;
-    const height = 400;
-
-    // Verify the URL resolves (Picsum returns a redirect to the actual image)
-    const url = `https://picsum.photos/seed/${seed}/${width}/${height}`;
+    const url = `https://picsum.photos/seed/${seed}/600/400`;
     const res = await fetch(url, { method: 'HEAD', redirect: 'follow', timeout: 5000 });
-    return res.ok ? url : `https://picsum.photos/${width}/${height}`;
+    return res.ok ? url : `https://picsum.photos/600/400`;
   } catch {
-    // Fallback: random image
     return `https://picsum.photos/600/400?random=${Date.now()}`;
   }
 };
 
-/* ── GET /api/products ── */
+/* -- GET /api/products -- */
 const getAllProducts = async (req, res, next) => {
   try {
-    const pageNum = parseInt(req.query.page) || 1;
-    const limitNum = parseInt(req.query.limit) || 20;
-    const offset = (pageNum - 1) * limitNum;
+    const { category, artist, search } = req.query;
+    const page   = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit  = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const offset = (page - 1) * limit;
 
     let where = [];
     let params = [];
 
-    if (req.query.category) { where.push('category = ?'); params.push(req.query.category); }
-    if (req.query.artist)   { where.push('artist LIKE ?');   params.push(`%${req.query.artist}%`); }
-    if (req.query.search)   {
-      where.push('(name LIKE ? OR description LIKE ?)');
-      params.push(`%${req.query.search}%`, `%${req.query.search}%`);
-    }
+    if (category) { where.push('category = ?');                    params.push(category); }
+    if (artist)   { where.push('artist LIKE ?');                   params.push(`%${artist}%`); }
+    if (search)   { where.push('(name LIKE ? OR description LIKE ?)'); params.push(`%${search}%`, `%${search}%`); }
 
     const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
@@ -44,8 +36,8 @@ const getAllProducts = async (req, res, next) => {
     const total = countRows[0].total;
 
     const [rows] = await pool.execute(
-      `SELECT * FROM products ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-      [...params, limitNum, offset]
+      `SELECT * FROM products ${whereClause} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`,
+      params
     );
 
     res.json({
@@ -53,9 +45,9 @@ const getAllProducts = async (req, res, next) => {
       data: rows,
       pagination: {
         total,
-        page: pageNum,
-        limit: limitNum,
-        totalPages: Math.ceil(total / limitNum),
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
     });
   } catch (err) {
@@ -63,7 +55,7 @@ const getAllProducts = async (req, res, next) => {
   }
 };
 
-/* ── GET /api/products/:id ── */
+/* -- GET /api/products/:id -- */
 const getProductById = async (req, res, next) => {
   try {
     const [rows] = await pool.execute('SELECT * FROM products WHERE id = ?', [req.params.id]);
@@ -76,12 +68,11 @@ const getProductById = async (req, res, next) => {
   }
 };
 
-/* ── POST /api/products ── */
+/* -- POST /api/products -- */
 const createProduct = async (req, res, next) => {
   try {
     const { name, description, price, stock, category, artist } = req.body;
 
-    // Fetch image from external API (Lorem Picsum)
     const image_url = await fetchArtImageUrl(name);
 
     const [result] = await pool.execute(
@@ -102,7 +93,7 @@ const createProduct = async (req, res, next) => {
   }
 };
 
-/* ── PUT /api/products/:id ── */
+/* -- PUT /api/products/:id -- */
 const updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -114,7 +105,6 @@ const updateProduct = async (req, res, next) => {
 
     const fields = Object.keys(req.body);
     const values = Object.values(req.body);
-
     const setClause = fields.map((f) => `${f} = ?`).join(', ');
     await pool.execute(`UPDATE products SET ${setClause} WHERE id = ?`, [...values, id]);
 
@@ -125,7 +115,7 @@ const updateProduct = async (req, res, next) => {
   }
 };
 
-/* ── DELETE /api/products/:id ── */
+/* -- DELETE /api/products/:id -- */
 const deleteProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -133,7 +123,6 @@ const deleteProduct = async (req, res, next) => {
     if (!existing.length) {
       return res.status(404).json({ success: false, message: 'Producto no encontrado' });
     }
-
     await pool.execute('DELETE FROM products WHERE id = ?', [id]);
     res.json({ success: true, message: 'Producto eliminado correctamente' });
   } catch (err) {
@@ -141,7 +130,7 @@ const deleteProduct = async (req, res, next) => {
   }
 };
 
-/* ── GET /api/products/categories ── */
+/* -- GET /api/products/categories -- */
 const getCategories = async (_req, res, next) => {
   try {
     const [rows] = await pool.execute(
