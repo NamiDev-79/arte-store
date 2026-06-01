@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { api } from '../../lib/api';
+import { api } from '../../../lib/api';
 
 export default function ProductPage({ params }) {
   const [product, setProduct] = useState(null);
