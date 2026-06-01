@@ -9,9 +9,9 @@
 
 | Recurso | URL |
 |---------|-----|
-| 🌐 Frontend en línea | `https://arte-store-frontend.up.railway.app` |
-| 🔌 API en línea | `https://arte-store-backend.up.railway.app` |
-| ❤️ Health check | `https://arte-store-backend.up.railway.app/health` |
+| 🌐 Frontend en línea | `https://arte-store-frontend-production.up.railway.app` |
+| 🔌 API en línea | `https://arte-store-backend-production.up.railway.app` |
+| ❤️ Health check | `https://arte-store-backend.production.up.railway.app/health` |
 | 📦 Repositorio | `https://github.com/NamiDev-79/arte-store` |
 
 
@@ -112,12 +112,12 @@ npm run dev        # Corre en http://localhost:3000
 
 ## 📡 Endpoints de la API
 
-Base URL: `https://arte-store-backend.up.railway.app`
+Base URL: `https://arte-store-backend-production.up.railway.app`
 
 ### `GET /health`
 Verificar estado del servidor.
 ```bash
-curl https://arte-store-backend.up.railway.app/health
+curl https://arte-store-backend-production.up.railway.app/health
 ```
 ```json
 { "status": "ok", "timestamp": "2024-01-15T10:30:00.000Z", "service": "arte-store-api" }
@@ -139,16 +139,16 @@ Listar todos los productos. Soporta filtros opcionales.
 
 ```bash
 # Todos los productos
-curl https://arte-store-backend.up.railway.app/api/products
+curl "https://arte-store-backend-production.up.railway.app/api/products"
 
 # Filtrar por categoría
-curl "https://arte-store-backend.up.railway.app/api/products?category=Pintura"
+curl "https://arte-store-backend-production.up.railway.app/api/products?category=Pintura"
 
 # Buscar por texto
-curl "https://arte-store-backend.up.railway.app/api/products?search=acuarela"
+curl "https://arte-store-backend-production.up.railway.app/api/products?search=acuarela"
 
 # Paginación
-curl "https://arte-store-backend.up.railway.app/api/products?page=2&limit=5"
+curl "https://arte-store-backend-production.up.railway.app/api/products?page=2&limit=5"
 ```
 
 **Respuesta exitosa (200):**
@@ -184,7 +184,7 @@ curl "https://arte-store-backend.up.railway.app/api/products?page=2&limit=5"
 Obtener un producto por ID.
 
 ```bash
-curl https://arte-store-backend.up.railway.app/api/products/1
+curl https://arte-store-backend-production.up.railway.app/api/products/1
 ```
 
 **Respuesta (200):**
@@ -206,7 +206,7 @@ curl https://arte-store-backend.up.railway.app/api/products/1
 Crear un nuevo producto. **La imagen se obtiene automáticamente de Lorem Picsum.**
 
 ```bash
-curl -X POST https://arte-store-backend.up.railway.app/api/products \
+curl -X POST https://arte-store-backend-production.up.railway.app/api/products \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Acuarela – Mar en calma",
@@ -251,7 +251,7 @@ curl -X POST https://arte-store-backend.up.railway.app/api/products \
 Actualizar un producto existente. Solo los campos enviados serán modificados.
 
 ```bash
-curl -X PUT https://arte-store-backend.up.railway.app/api/products/1 \
+curl -X PUT https://arte-store-backend-production.up.railway.app/api/products/1 \
   -H "Content-Type: application/json" \
   -d '{ "price": 1350.00, "stock": 2 }'
 ```
@@ -271,7 +271,7 @@ curl -X PUT https://arte-store-backend.up.railway.app/api/products/1 \
 Eliminar un producto.
 
 ```bash
-curl -X DELETE https://arte-store-backend.up.railway.app/api/products/6
+curl -X DELETE https://arte-store-backend-production.up.railway.app/api/products/6
 ```
 
 **Respuesta (200):**
@@ -285,7 +285,7 @@ curl -X DELETE https://arte-store-backend.up.railway.app/api/products/6
 Listar todas las categorías disponibles.
 
 ```bash
-curl https://arte-store-backend.up.railway.app/api/products/categories
+curl https://arte-store-backend-production.up.railway.app/api/products/categories
 ```
 ```json
 { "success": true, "data": ["Acuarela", "Cerámica", "Escultura", "Fotografía", "Pintura"] }
