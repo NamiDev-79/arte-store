@@ -22,17 +22,18 @@ const fetchArtImageUrl = async (productName) => {
 /* ── GET /api/products ── */
 const getAllProducts = async (req, res, next) => {
   try {
-    const { category, artist, search, page = 1, limit = 20 } = req.query;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const pageNum = parseInt(req.query.page) || 1;
+    const limitNum = parseInt(req.query.limit) || 20;
+    const offset = (pageNum - 1) * limitNum;
 
     let where = [];
     let params = [];
 
-    if (category) { where.push('category = ?'); params.push(category); }
-    if (artist)   { where.push('artist LIKE ?');   params.push(`%${artist}%`); }
-    if (search)   {
+    if (req.query.category) { where.push('category = ?'); params.push(req.query.category); }
+    if (req.query.artist)   { where.push('artist LIKE ?');   params.push(`%${req.query.artist}%`); }
+    if (req.query.search)   {
       where.push('(name LIKE ? OR description LIKE ?)');
-      params.push(`%${search}%`, `%${search}%`);
+      params.push(`%${req.query.search}%`, `%${req.query.search}%`);
     }
 
     const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
@@ -44,7 +45,7 @@ const getAllProducts = async (req, res, next) => {
 
     const [rows] = await pool.execute(
       `SELECT * FROM products ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-      [...params, parseInt(limit), offset]
+      [...params, limitNum, offset]
     );
 
     res.json({
@@ -52,9 +53,9 @@ const getAllProducts = async (req, res, next) => {
       data: rows,
       pagination: {
         total,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        totalPages: Math.ceil(total / parseInt(limit)),
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
       },
     });
   } catch (err) {
