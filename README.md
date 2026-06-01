@@ -307,43 +307,6 @@ https://picsum.photos/seed/{nombre-producto-slugificado}/600/400
 
 ---
 
-## 🚀 Despliegue en Railway
-
-### Paso 1 — Crear el proyecto en Railway
-1. Ve a [railway.app](https://railway.app) e inicia sesión con GitHub
-2. Haz clic en **New Project → Deploy from GitHub repo** y selecciona tu repositorio
-
-### Paso 2 — Agregar la base de datos MySQL
-1. Dentro del proyecto, clic en **+ Add Service → Database → MySQL**
-2. Railway crea la BD y expone automáticamente las variables:  
-   `MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLDATABASE`, `MYSQL_URL`
-
-### Paso 3 — Desplegar el Backend
-1. Clic en **+ Add Service → GitHub Repo**, selecciona el repo
-2. En **Settings → Source**, establece **Root Directory:** `backend`
-3. Railway detecta el `railway.toml` y usa `npm start` automáticamente
-4. En **Variables**, agrega:
-   ```
-   NODE_ENV=production
-   FRONTEND_URL=https://TU-FRONTEND.up.railway.app
-   ```
-5. Conecta la variable de MySQL: en **Variables → Add Reference**, selecciona `MYSQL_URL` desde el servicio MySQL
-
-### Paso 4 — Desplegar el Frontend
-1. Clic en **+ Add Service → GitHub Repo** (misma repo, nuevo servicio)
-2. **Root Directory:** `frontend`
-3. En **Variables**, agrega:
-   ```
-   NEXT_PUBLIC_API_URL=https://TU-BACKEND.up.railway.app
-   ```
-
-### Paso 5 — Generar dominios públicos
-En cada servicio, ve a **Settings → Networking → Generate Domain** para obtener la URL pública.
-
-> **Tip:** Una vez que tengas la URL del backend, actualiza `FRONTEND_URL` en el backend y `NEXT_PUBLIC_API_URL` en el frontend, y haz redeploy.
-
----
-
 ## 🛠️ Stack Tecnológico
 
 | Capa | Tecnología |
@@ -359,15 +322,3 @@ En cada servicio, ve a **Settings → Networking → Generate Domain** para obte
 | Despliegue | Railway.app |
 
 ---
-
-## ✅ Criterios de Evaluación Cubiertos
-
-- **CRUD completo** → `GET`, `GET/:id`, `POST`, `PUT`, `DELETE` para `/api/products`
-- **MySQL** → Tabla `products` con todos los campos requeridos + índices
-- **API externa** → Lorem Picsum consultado automáticamente en `POST /api/products`
-- **Validaciones** → Joi con mensajes en español, `abortEarly: false`
-- **Manejo de errores** → Middleware global, códigos HTTP correctos (400, 404, 409, 500)
-- **Logging** → Morgan en cada request (formato extendido)
-- **Código modular** → Controladores, rutas, middleware, validadores separados
-- **Despliegue** → Railway.app con `railway.toml` en backend y frontend
-- **README** → Descripción, instalación local, URL online, ejemplos de API
